@@ -1,0 +1,40 @@
+FROM alpine:latest
+
+ENV KAFKA_VERSION 3.3.1
+ENV SCALA_VERSION 2.13
+
+LABEL name="kafka" version=${KAFKA_VERSION}
+
+RUN apk -U upgrade
+ 
+RUN apk add --no-cache openjdk11-jre bash coreutils su-exec gettext
+
+RUN apk add --no-cache -t .build-deps curl ca-certificates jq \
+  && mkdir -p /opt \
+  && mirror=$(curl --stderr /dev/null https://www.apache.org/dyn/closer.cgi\?as_json\=1 | jq -r '.preferred') \
+  && curl -sSL "${mirror}kafka/${KAFKA_VERSION}/kafka_${SCALA_VERSION}-${KAFKA_VERSION}.tgz" \
+  | tar -xzf - -C /opt \
+  && mv /opt/kafka_${SCALA_VERSION}-${KAFKA_VERSION} /opt/kafka \
+  && adduser -DH -s /sbin/nologin kafka \
+  && chown -R kafka: /opt/kafka \
+  && rm -rf /tmp/* \
+  && apk del --purge .build-deps
+
+ENV PATH /sbin:/opt/kafka/bin/:$PATH
+
+ENV KAFKA_HEAP_OPTS "-XX:MaxRAMPercentage=70 -XshowSettings:vm -XX:+ExitOnOutOfMemoryError"
+
+COPY zookeeper_*.properties /opt/kafka/config/
+COPY server_*.properties /opt/kafka/config/
+
+ADD https://github.com/zBrainiac/StreamAnalytics/releases/download/StreamAnalytics_0.2.0/StreamAnalytics-0.2.0.0.jar /opt/streamAnalytics/streamAnalytics-0.2.0.0.jar
+
+RUN mkdir -p /tmp 
+COPY nohup_*.sh /tmp/ 
+COPY start_up_*.sh /opt/
+RUN chmod +x /tmp/nohup_*.sh
+RUN chmod +x /opt/start_up_*.sh
+WORKDIR /opt
+
+#ENTRYPOINT ["/bin/sh", "./nohup_no_domain.sh"]
+ENTRYPOINT ["tail", "-f", "/dev/null"]

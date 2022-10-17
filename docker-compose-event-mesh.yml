@@ -1,0 +1,31 @@
+version: '3.8'
+
+networks:
+  default:
+    name: ssb_csp-ce-net
+    external: true
+
+services:
+  domain_3_IoT:
+    image: brainiac/event-mesh:0.0.1
+    entrypoint: ["./start_up_domain_3_IoT.sh"]
+    environment:
+    - DESTINATION=localhost:9093
+
+  domain_4_TRX:
+    image: brainiac/event-mesh:0.0.1
+    entrypoint: ["./start_up_domain_4_TRX.sh"]
+    environment:
+    - DESTINATION=localhost:9094
+
+  domain_5_shared:
+    image: brainiac/event-mesh:0.0.1
+    entrypoint: ["./start_up_domain_5_shared.sh"]
+    environment:
+    - DESTINATION=localhost:9095
+
+  domain_6_CRM:
+    image: brainiac/event-mesh:0.0.1
+    entrypoint: ["./start_up_domain_6_CRM.sh"]
+    environment:
+    - DESTINATION=localhost:9096

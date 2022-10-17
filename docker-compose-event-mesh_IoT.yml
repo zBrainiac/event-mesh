@@ -1,0 +1,13 @@
+version: '3.8'
+
+networks:
+  default:
+    name: ssb_csp-ce-net
+    external: true
+
+services:
+  domain_3_IoT:
+    image: brainiac/event-mesh:0.0.1
+    entrypoint: ["./start_up_domain_3_IoT.sh"]
+    environment:
+    - DESTINATION=localhost:9093

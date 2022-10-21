@@ -6,8 +6,8 @@ networks:
     external: true
 
 services:
-  domain_IoT:
+  domain_all:
     image: brainiac/event-mesh:0.0.1
-    entrypoint: ["./start_up_domain_3_IoT.sh"]
+    entrypoint: ["./start_up_no_domain.sh"]
     environment:
-    - DESTINATION=localhost:9093
+    - DESTINATION=ssb-kafka-1:9092

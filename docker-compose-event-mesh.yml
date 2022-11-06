@@ -12,6 +12,18 @@ services:
     environment:
     - DESTINATION=localhost:9093
 
+  domain_IoT_refdatadb:
+    image: brainiac/event-mesh-refdata:0.0.1
+    container_name: domain_shared-refdata
+    hostname: refdatadb
+    environment:
+      - POSTGRES_PASSWORD=Supersecret1
+      - POSTGRES_USER=postgres
+      - PGUSER=postgres
+      - POSTGRES_DB=testdb
+    ports:
+      - 6666:5432
+
   domain_TRX:
     image: brainiac/event-mesh:0.0.1
     entrypoint: ["./start_up_domain_4_TRX.sh"]

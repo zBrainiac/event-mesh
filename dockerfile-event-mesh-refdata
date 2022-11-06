@@ -1,0 +1,9 @@
+# docker buildx build --platform linux/amd64,linux/arm64 -f dockerfile-event-mesh-refdata --tag brainiac/event-mesh-refdata:0.0.1 --push .
+
+FROM postgres:alpine
+COPY *.sql /docker-entrypoint-initdb.d/
+COPY data/geolocation_ch.csv /tmp/geolocation_ch.csv
+RUN chmod 777 /tmp/geolocation_ch.csv
+ADD setup.sql /docker-entrypoint-initdb.d
+RUN chmod a+r /docker-entrypoint-initdb.d/*
+EXPOSE 6666

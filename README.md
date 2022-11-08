@@ -1,3 +1,13 @@
+# Event Mesh
+Data mesh has been one of the trendy buzzwords for several years now, but what does it mean exactly?
+The mesh paradigm is a design concept and organizational approach that aims to manage data in a distributed manner across the enterprise, so it is not a technical implementation.
+
+Analyst firm Gartner describes data mesh as an architecture designed with “the specific goal of building business-focused data products”.
+
+In our case we will use the following scenario:
+![](images/2022-11-08_Event_mesh_domain-overview.png)
+
+
 
 ## Pre-Requisites
 Install required software:
@@ -40,6 +50,8 @@ docker-compose -f docker-compose-event-mesh_no_domain.yml up -d
 
 ### Data Providers > Register Kafka Provider
 In order to access external Kafka brokers, they must be registered as 'Data Providers' in CSP CE.
+
+![](images/2022-11-08_Event_mesh_domain-DataProviderReg.png)
 
 | Domain | Broker Connect String | Connection Protocol |
 |--------|-----------------------|---------------------|
@@ -113,6 +125,8 @@ CREATE TABLE `ssb`.`ssb_default`.`raw_fxrate` (
 )
 ```
 After we have created all the 'Data Providers' and associated table definitions (DDL), we can start queries across domains using standard SQL.
+
+![](images/2022-11-08_Event_mesh_SQL_console.png)
 
 ```
 SELECT

@@ -78,9 +78,11 @@ default-database = testdb
 switch to the SQL console
 
 As a next step, a table must be created for each Kafka topic so that the SQL can be used later.
-Note that the `properties.bootstrap.servers` uses the previously registered 'Data Providers'. 
-in our case: `'ssb-domain_TRX-1:9094'` or `'ssb-domain_Shared-1:9095'`
+Note that the `properties.bootstrap.servers` uses the previously registered 'Data Providers'.
 
+In our case the 'Data Providers' are: `'ssb-domain_TRX-1:9094'` or `'ssb-domain_Shared-1:9095'`
+
+DDL for Tables:
 ```
 CREATE TABLE `ssb`.`ssb_default`.`raw_transaction_cc` (
   `cc_ts` BIGINT,
@@ -129,6 +131,50 @@ After we have created all the 'Data Providers' and associated table definitions 
 ![](images/2022-11-08_Event_mesh_SQL_console.png)
 
 ```
+SELECT
+ trx.cc_ts,
+ trx.cc_id,
+ trx.cc_type,
+ trx.shop_name,
+ trx.fx_exch_currency,
+ trx.amount_orig,
+ fx.fx_rate,
+ geo.city,
+ geo.lat,
+ geo.log
+FROM raw_transaction_cc trx
+INNER JOIN `refData`.`testdb`.`public.geolocation_ch`geo ON trx.shop_id = geo.sensor_id  
+INNER JOIN raw_fxrate fx ON trx.fx_exch_currency = fx.fx_exch;
+```
+
+To publish merged events into a new created topic `int-cctrx-fx-enriched`
+on the local Kafka Broker `kafka:9092`
+
+DDL for creating sink table/Kafka out:
+```
+CREATE TABLE  `sink_int_cctrx_fx_enriched` (
+  `cc_ts` BIGINT,
+  `cc_id` VARCHAR(2147483647),
+  `cc_type` VARCHAR(2147483647),
+  `shop_name` VARCHAR(2147483647),
+  `fx_exch_currency` VARCHAR(2147483647),
+  `amount_orig` DOUBLE,
+  `fx_rate` DOUBLE,
+  `city` VARCHAR(255),
+  `lat` FLOAT,
+  `log` FLOAT
+) WITH (
+  'connector' = 'kafka: Local Kafka',
+  'format' = 'json', 
+  'scan.startup.mode' = 'group-offsets', 
+  'topic' = 'int-cctrx-fx-enriched'
+);
+```
+
+Adjusted SQL to insert result into newly created table:
+
+```
+INSERT INTO `sink_int_cctrx_fx_enriched` 
 SELECT
  trx.cc_ts,
  trx.cc_id,
